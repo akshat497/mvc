@@ -6,14 +6,16 @@
 // module.exports=userController
 const User=require('../../modals/user')
 const bcrypt=require( 'bcrypt');
+const jwt=require("jsonwebtoken");
+const handleResponse  = require('../services/handleResponse');
 const userController={
     registerUser:async(req,res)=>{
         const { name, email, location, password } = req.body;
 
         // Check if required fields are missing
         if (!name || !email || !location || !password) {
-            return res.status(400).json({ message: "Required fields are missing!" });
-        }
+            handleResponse(res,400,"Required fields are missing!")
+         }
         
         try {
             // Create user
@@ -37,19 +39,41 @@ const userController={
         const {email,password}=req.body;
          const existingUser=await User.findOne({email});
          if(!existingUser){
-            return res.status(404).json({message:"Invalid crediancials!"})
+            return handleResponse(res,404,"Invalid crediancials!!")
+        
+            // return res.status(404).json({message:"Invalid crediancials!"})
          }
          try {
             const passwordIsValid=await bcrypt.compare(password, existingUser.password);
             if(!passwordIsValid){
-                return res.status(401).json({message:"Invalid crediancials! "})
+                return handleResponse(res,404,"Invalid crediancials!!")
             }
-            return res.status(200).json({message:"successfull"})
+             const payload={
+                id:existingUser._id
+             }
+             const authToken=jwt.sign(payload,process.env.JWT_SCRT)
+            return handleResponse(res,200,"successfull",null,authToken)
+            // return res.status(200).json({message:"successfull",token:authToken})
          } catch (error) {
             console.log(error);
             return res.status(500).json({message: 'Server Error!'})
          }
 
+
+    },
+    fetchUser:async(req,res)=>{
+     try {
+        const token=req.header("Authorization")
+        if(!token){
+            return handleResponse(res,404,null,"No token provided")
+        }
+        const payload=jwt.verify(token,process.env.JWT_SCRT)
+        const user=await User.findOne(payload._id)
+        return handleResponse(res,200,"successfull",null,user)
+        
+     } catch (error) {
+         return handleResponse(res,500,"Server error",error,null)
+     }
 
     }
 
