@@ -63,13 +63,8 @@ const userController={
     },
     fetchUser:async(req,res)=>{
      try {
-        const token=req.header("Authorization")
-        if(!token){
-            return handleResponse(res,404,null,"No token provided")
-        }
-        const payload=jwt.verify(token,process.env.JWT_SCRT)
-        const user=await User.findOne(payload._id)
-        return handleResponse(res,200,"successfull",null,user)
+       
+        return handleResponse(res,200,"successfull",null,req.user)
         
      } catch (error) {
          return handleResponse(res,500,"Server error",error,null)
