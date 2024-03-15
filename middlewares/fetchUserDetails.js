@@ -10,9 +10,15 @@ const fetchUserDetails = async(req,res,next) => {
            return handleResponse(res,404,null,"No token provided",null)
        }
        const payload=jwt.verify(token,process.env.JWT_SCRT)
-       const user=await User.findOne(payload._id).select('-password')
+       console.log(payload)
+       const user=await User.findOne({_id:payload.id}).select('-password')
        if(!user){
         return handleResponse(res,400,null,"No user found")
+       }
+       console.log(user._id)
+       console.log(payload.id)
+       if(user._id.toString()!==payload.id){
+        return handleResponse(res,401,null,'unauthorized user')
        }
       
        req.user=user;
