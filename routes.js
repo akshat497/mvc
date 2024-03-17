@@ -14,6 +14,9 @@ routes.get('/fetchuser',fetchUserDetails,userController.fetchUser)
 
 //menuCardRoutes
 routes.post('/addMenuCard',fetchUserDetails,menuCardController.addMenuCard)
+routes.delete('/deleteMenuCard/',fetchUserDetails,menuCardController.deleteMenuCard)
+routes.put('/updateMenuCard/',fetchUserDetails,menuCardController.updateMenuCard)
+
 
 
 
